@@ -1,0 +1,30 @@
+services:
+  # 這是我們的 Django 後端服務
+  - type: web
+    name: pet-health-api # 您可以自訂服務名稱
+    env: python
+    region: singapore # 選擇離台灣最近的伺服器位置
+    plan: free # 使用免費方案
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --no-input
+      python manage.py migrate
+    startCommand: "gunicorn health_cats.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: pet-database
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true # Render 會自動產生一個安全的 SECRET_KEY
+      - key: PYTHON_VERSION
+        value: 3.11.9 # 建議指定您開發時使用的 Python 版本
+      - key: DEBUG
+        value: False # 在生產環境中關閉 DEBUG 模式
+
+  # 這是我們的 PostgreSQL 資料庫服務
+  - type: pserv
+    name: pet-database # 資料庫名稱，需與上面 fromService 的 name 一致
+    plan: free # 使用免費方案
+    postgresmajorversion: 14 # 指定 PostgreSQL 版本
