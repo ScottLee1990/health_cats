@@ -2,14 +2,11 @@ services:
   - type: web
     name: pet-health-api
     env: python
-    region: singapore
+    region: singapore # 網站服務在新加坡
     plan: free
-    # 【已修正】從 buildCommand 中移除 migrate 指令
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --no-input
-    # 【已修正】將 migrate 指令加到 startCommand 的最前面
-    # "&&" 的意思是：如果前面的指令成功，才執行後面的指令
     startCommand: "python manage.py migrate && gunicorn health_cats.wsgi:application"
     envVars:
       - key: DATABASE_URL
@@ -26,3 +23,4 @@ services:
 databases:
   - name: pet-database
     plan: free
+    region: singapore # 【已修正】為資料庫也指定同一個地區
