@@ -27,4 +27,4 @@ services:
   - type: pserv
     name: pet-database # 資料庫名稱，需與上面 fromService 的 name 一致
     plan: free # 使用免費方案
-    postgresmajorversion: 14 # 指定 PostgreSQL 版本
+    postgresMajorVersion: 14 # 【已修正】將 'v' 改為大寫 'V'
