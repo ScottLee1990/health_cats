@@ -1,23 +1,18 @@
-# databases 區塊專門用來定義資料庫
-databases:
-  - name: pet-database
-    plan: free # 免費方案
-
-# services 區塊用來定義您的應用程式
 services:
   - type: web
     name: pet-health-api
     env: python
     region: singapore
     plan: free
+    # 【已修正】從 buildCommand 中移除 migrate 指令
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --no-input
-      python manage.py migrate
-    startCommand: "gunicorn health_cats.wsgi:application"
+    # 【已修正】將 migrate 指令加到 startCommand 的最前面
+    # "&&" 的意思是：如果前面的指令成功，才執行後面的指令
+    startCommand: "python manage.py migrate && gunicorn health_cats.wsgi:application"
     envVars:
       - key: DATABASE_URL
-        # 【已修正】從 fromService 改為 fromDatabase
         fromDatabase:
           name: pet-database
           property: connectionString
@@ -27,3 +22,7 @@ services:
         value: "3.11.9"
       - key: DEBUG
         value: False
+
+databases:
+  - name: pet-database
+    plan: free
