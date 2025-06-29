@@ -197,17 +197,11 @@ REST_FRAMEWORK = {
 # 這會在你的專案根目錄下建立一個名為 'media' 的資料夾
 # MEDIA_ROOT = BASE_DIR / 'media'
 
-# 【新增】Cloudinary 的設定
-# 只有當 DEBUG=False (在生產環境中) 時，才使用 Cloudinary
-if not DEBUG:
-    CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-        'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-    }
-    # 告訴 Django，預設的檔案儲存系統現在是 Cloudinary
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-else:
-    # 在本地開發時，繼續使用原本的檔案系統
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+# 告訴 Django，預設的檔案儲存系統是 Cloudinary。
+# 這個設定只會在偵測到 CLOUDINARY_URL 環境變數時才真正生效 (也就是在 Render 上)
+# 在您沒有設定 CLOUDINARY_URL 的本地電腦上，它會被忽略，繼續使用本地儲存。
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# 繼續保留本地開發時的 MEDIA 設定
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
