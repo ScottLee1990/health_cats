@@ -35,20 +35,26 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Application definition
 
 INSTALLED_APPS = [
-    'cloudinary_storage',  # 【新增】
-    'django.contrib.staticfiles',  # 【新增】必須在 cloudinary_storage 之後
-    'cloudinary',  # 【新增】
-    'corsheaders',
+    # 第三方套件，Cloudinary 相關的放最前面
+    'cloudinary_storage',
+    'django.contrib.staticfiles', # 【已修正】確保它只出現一次，並緊跟在 cloudinary_storage 之後
+    'cloudinary',
+
+    # Django REST Framework 相關
     'rest_framework',
     'rest_framework.authtoken',
-    'accounts',
-    'pets',
+    'corsheaders',
+
+    # 您自己的 Apps
+    'accounts.apps.AccountsConfig', # 建議使用完整的 AppConfig 路徑
+    'pets.apps.PetsConfig',       # 建議使用完整的 AppConfig 路徑
+
+    # Django 內建 Apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [
