@@ -185,23 +185,29 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
+# settings.py (檔案最底部)
+
 # ==============================================================================
-# Media Files (User-uploaded files) 設定
-# https://docs.djangoproject.com/en/4.2/howto/static-files/#serving-files-uploaded-by-a-user-during-development
+# 開發環境 vs. 生產環境 的設定切換
 # ==============================================================================
 
-# 瀏覽器存取媒體檔案時使用的 URL 前綴
-# MEDIA_URL = '/media/'
+# 判斷是否在生產環境中 (Render 會設定 DEBUG 環境變數為 'False')
+IS_PRODUCTION = os.environ.get('DEBUG') == 'False'
 
-# 伺服器上儲存媒體檔案的實際檔案系統路徑
-# 這會在你的專案根目錄下建立一個名為 'media' 的資料夾
-# MEDIA_ROOT = BASE_DIR / 'media'
+if IS_PRODUCTION:
+    # --- 生產環境設定 (On Render) ---
+    print("Running in PRODUCTION mode")  # 這行可以幫助我們在 logs 中確認模式是否正確
 
-# 告訴 Django，預設的檔案儲存系統是 Cloudinary。
-# 這個設定只會在偵測到 CLOUDINARY_URL 環境變數時才真正生效 (也就是在 Render 上)
-# 在您沒有設定 CLOUDINARY_URL 的本地電腦上，它會被忽略，繼續使用本地儲存。
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    # 告訴 Django，所有使用者上傳的檔案都交給 Cloudinary 處理
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# 繼續保留本地開發時的 MEDIA 設定
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+    # 在生產環境中，我們不再需要 MEDIA_URL 和 MEDIA_ROOT，因為檔案由 Cloudinary 提供
+    # WhiteNoise 會處理 staticfiles，Cloudinary 會處理 mediafiles
+
+else:
+    # --- 本地開發環境設定 (Local Development) ---
+    print("Running in DEVELOPMENT mode")
+
+    # 繼續使用本地檔案系統來儲存上傳的檔案
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
