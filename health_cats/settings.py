@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
-import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,30 +20,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY','django-insecure-%29&d4-mohrru+3*p%$^439+bw(d7g37xp=nu_qld8gmoyuum2')
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = []
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
 
 # Application definition
 
 INSTALLED_APPS = [
-    # 第三方套件，Cloudinary 相關的放最前面
-    'cloudinary_storage',
     'django.contrib.staticfiles', # 【已修正】確保它只出現一次，並緊跟在 cloudinary_storage 之後
-    'cloudinary',
-
     # Django REST Framework 相關
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-
     # 您自己的 Apps
     'accounts.apps.AccountsConfig', # 建議使用完整的 AppConfig 路徑
     'pets.apps.PetsConfig',       # 建議使用完整的 AppConfig 路徑
@@ -58,7 +48,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -94,10 +83,10 @@ WSGI_APPLICATION = 'health_cats.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 
@@ -136,8 +125,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -185,29 +177,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
-# settings.py (檔案最底部)
 
-# ==============================================================================
-# 開發環境 vs. 生產環境 的設定切換
-# ==============================================================================
-
-# 判斷是否在生產環境中 (Render 會設定 DEBUG 環境變數為 'False')
-IS_PRODUCTION = os.environ.get('DEBUG') == 'False'
-
-if IS_PRODUCTION:
-    # --- 生產環境設定 (On Render) ---
-    print("Running in PRODUCTION mode")  # 這行可以幫助我們在 logs 中確認模式是否正確
-
-    # 告訴 Django，所有使用者上傳的檔案都交給 Cloudinary 處理
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-    # 在生產環境中，我們不再需要 MEDIA_URL 和 MEDIA_ROOT，因為檔案由 Cloudinary 提供
-    # WhiteNoise 會處理 staticfiles，Cloudinary 會處理 mediafiles
-
-else:
-    # --- 本地開發環境設定 (Local Development) ---
-    print("Running in DEVELOPMENT mode")
-
-    # 繼續使用本地檔案系統來儲存上傳的檔案
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+try:
+    from .local_settings import *
+except ImportError:
+    pass
