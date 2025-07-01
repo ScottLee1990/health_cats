@@ -22,25 +22,23 @@ class WeightLogSerializer(serializers.ModelSerializer):
         fields = ['id', 'weight_kg', 'recorded_at']
 
 class PetSerializer(serializers.ModelSerializer):
-
-    # *** 新增這一行 ***
-    tracking_log_count = serializers.SerializerMethodField()
-    # 顯示 owner 的 username 而不是 id，且設為唯讀
     owner = serializers.ReadOnlyField(source='owner.username')
-    # 顯示 pet_type 的名稱
     pet_type = serializers.CharField(source='pet_type.name', read_only=True)
     pet_species = serializers.CharField(source='pet_species.name', read_only=True)
     favorite_food_display = serializers.CharField(source='get_favorite_food_display', read_only=True)
-    # 寫入時需要傳 ID
+
     pet_type_id = serializers.PrimaryKeyRelatedField(
         queryset=PetType.objects.all(), source='pet_type', write_only=True
     )
     pet_species_id = serializers.PrimaryKeyRelatedField(
         queryset=PetSpecies.objects.all(), source='pet_species', write_only=True
     )
-    def get_tracking_log_count(self, obj):
-        # 計算這隻寵物 (obj) 有多少筆 health_logs 的 case_closed 是 False
-        return obj.health_logs.filter(case_closed=False).count()
+
+    # *** 新增：計算欄位，用於顯示待追蹤日誌數量 ***
+    tracking_log_count = serializers.SerializerMethodField()
+
+    # *** 新增：計算欄位，用於顯示下次疫苗日期 ***
+    next_injection_date = serializers.SerializerMethodField()
 
     class Meta:
         model = Pet
@@ -48,9 +46,24 @@ class PetSerializer(serializers.ModelSerializer):
             'id', 'name', 'owner', 'age',
             'pet_type', 'pet_species', 'gender', 'birth_day',
             'photo', 'created_at', 'updated_at', 'memo', 'favorite_food', 'favorite_food_display',
-            # 用於寫入的欄位
-            'pet_type_id', 'pet_species_id', 'tracking_log_count'
+            'pet_type_id', 'pet_species_id',
+            'tracking_log_count',  # 將新欄位加入 fields 中
+            'next_injection_date'  # 將新欄位加入 fields 中
         ]
+
+    # *** 新增這個函式，用來計算 tracking_log_count 的值 ***
+    def get_tracking_log_count(self, obj):
+        # 計算這隻寵物 (obj) 有多少筆 health_logs 的 case_closed 是 False
+        return obj.health_logs.filter(case_closed=False).count()
+
+    # *** 新增這個函式，用來計算 next_injection_date 的值 ***
+    def get_next_injection_date(self, obj):
+        # 找到這隻寵物最近的一筆疫苗紀錄
+        latest_injection = obj.injection_logs.order_by('-injection_date').first()
+        if latest_injection and latest_injection.next_date:
+            return latest_injection.next_date.strftime('%Y-%m-%d')
+        return None
+
 
 # 為 HealthLog 模型新增 Serializer
 class HealthLogSerializer(serializers.ModelSerializer):
