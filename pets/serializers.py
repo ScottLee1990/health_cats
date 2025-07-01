@@ -22,6 +22,9 @@ class WeightLogSerializer(serializers.ModelSerializer):
         fields = ['id', 'weight_kg', 'recorded_at']
 
 class PetSerializer(serializers.ModelSerializer):
+
+    # *** 新增這一行 ***
+    tracking_log_count = serializers.SerializerMethodField()
     # 顯示 owner 的 username 而不是 id，且設為唯讀
     owner = serializers.ReadOnlyField(source='owner.username')
     # 顯示 pet_type 的名稱
@@ -35,6 +38,9 @@ class PetSerializer(serializers.ModelSerializer):
     pet_species_id = serializers.PrimaryKeyRelatedField(
         queryset=PetSpecies.objects.all(), source='pet_species', write_only=True
     )
+    def get_tracking_log_count(self, obj):
+        # 計算這隻寵物 (obj) 有多少筆 health_logs 的 case_closed 是 False
+        return obj.health_logs.filter(case_closed=False).count()
 
     class Meta:
         model = Pet
@@ -43,7 +49,7 @@ class PetSerializer(serializers.ModelSerializer):
             'pet_type', 'pet_species', 'gender', 'birth_day',
             'photo', 'created_at', 'updated_at', 'memo', 'favorite_food', 'favorite_food_display',
             # 用於寫入的欄位
-            'pet_type_id', 'pet_species_id'
+            'pet_type_id', 'pet_species_id', 'tracking_log_count'
         ]
 
 # 為 HealthLog 模型新增 Serializer
