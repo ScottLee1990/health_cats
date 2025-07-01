@@ -56,7 +56,7 @@ class HealthLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = HealthLog
         # photo_records 是唯讀的，因為我們會從請求的 files 中取得
-        fields = ['id', 'topic', 'content', 'photo_records', 'action', 'action_write', 'created_at']
+        fields = ['id', 'topic', 'content', 'photo_records', 'action', 'action_write', 'case_closed', 'created_at']
         read_only_fields = ['photo_records']
 
 # 為 InjectionLog 模型新增 Serializer

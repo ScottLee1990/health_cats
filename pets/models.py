@@ -20,6 +20,9 @@ class FoodBrandChoices(models.TextChoices):
     HILLS = 'HILLS', '希爾思'
     ORIJEN = 'ORIJEN', '渴望'
     NUTRAM = 'NUTRAM', '紐頓'
+    CATPOOL = 'CATPOOL', '貓侍'
+    NUTRIENCE = 'NUTRIENCE', '紐崔斯'
+
 
 # --- Pet 分類模型 ---
 class PetType(models.Model):
@@ -88,6 +91,8 @@ class HealthLog(models.Model):
     content = models.TextField()
     photo_records = models.ImageField(upload_to='health_log_photos/', blank=True, null=True)
     action = models.CharField(max_length=20, choices=HealthAction.choices)
+    case_closed = models.BooleanField(default=False, verbose_name="是否結案")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
