@@ -25,8 +25,7 @@ urlpatterns = [
     path('api/',include('pets.urls')),
 ]
 
-# --- 以下為新增的程式碼 ---
-# 只有在 DEBUG 模式下，才讓 Django 開發伺服器來提供媒體檔案服務
+'''
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+'''

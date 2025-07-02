@@ -3,7 +3,7 @@
 from django.contrib import admin
 from .models import Pet, PetType, PetSpecies, WeightLog, HealthLog, InjectionLog
 
-# 將你的模型註冊到 admin 後台
+# 註冊模型
 admin.site.register(PetType)
 admin.site.register(PetSpecies)
 admin.site.register(Pet)

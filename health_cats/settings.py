@@ -19,10 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# 放local_settings.py
 SECRET_KEY = ''
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# EC2主機的local_settings.py用False
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -30,16 +30,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.staticfiles', # 【已修正】確保它只出現一次，並緊跟在 cloudinary_storage 之後
-    # Django REST Framework 相關
+    'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    # 您自己的 Apps
-    'accounts.apps.AccountsConfig', # 建議使用完整的 AppConfig 路徑
-    'pets.apps.PetsConfig',       # 建議使用完整的 AppConfig 路徑
-
-    # Django 內建 Apps
+    'accounts.apps.AccountsConfig',
+    'pets.apps.PetsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -78,10 +74,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'health_cats.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DEMO就先用sqlite3了
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -112,9 +108,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hant'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Taipei'
 
 USE_I18N = True
 
@@ -128,6 +124,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
+# 使用者上傳資料
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -136,43 +133,24 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ==============================================================================
 # CORS 設定
-# ==============================================================================
-
 # 允許跨來源請求的來源列表
 CORS_ALLOWED_ORIGINS = [
-    # 因為你是從本地端檔案 (`file://`) 開啟測試頁，其來源是 "null"
     "null",
-    # 未來如果你的前端部署在其他地方，也要把那個網址加進來
-    # 例如 React 開發伺服器: "http://localhost:3000"
 ]
-
-# 如果你想在開發時允許所有來源 (較不安全，但方便)
-# CORS_ALLOW_ALL_ORIGINS = True
-
-# 允許前端在請求中攜帶的非標準 Header
-# 我們的 JS Code 發送了 'Authorization'，所以必須允許它
 CORS_ALLOW_HEADERS = [
     'authorization',
     'content-type',
 ]
 
-# settings.py
 
-# ... (檔案底部，可以在 CORS 設定的上方或下方)
-
-# ==============================================================================
 # Django REST Framework 設定
-# ==============================================================================
 REST_FRAMEWORK = {
-    # 設定預設的驗證方式
+    # 設定預設的驗證方式 -> Token
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 告訴 DRF 我們要使用 Token 來驗證使用者身份
         'rest_framework.authentication.TokenAuthentication',
     ],
-    # 這裡也可以設定全域的預設權限，要求所有 API 都必須登入才能存取
-    # 這是一個好的安全實踐
+    # 所有API都必須登入才能存取
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ]

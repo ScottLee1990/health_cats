@@ -4,7 +4,7 @@ from rest_framework import serializers
 from .models import Profile
 
 class ProfileSerializer(serializers.ModelSerializer):
-    # 讓 `user` 欄位在讀取時顯示使用者名稱，且設為唯讀
+    # 先把user欄位設為唯讀,考慮看看要不要直接用username做資料
     user = serializers.StringRelatedField(read_only=True)
 
     class Meta:
