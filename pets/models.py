@@ -45,6 +45,8 @@ class Pet(models.Model):
     pet_type = models.ForeignKey(PetType, on_delete=models.SET_NULL, null=True, related_name='pets_of_type')
     pet_species = models.ForeignKey(PetSpecies, on_delete=models.SET_NULL, null=True, related_name='pets_of_species')
     gender = models.CharField(max_length=3, choices=PetGender.choices, default=PetGender.MALE)
+    # 新增：絕育
+    sterilised = models.BooleanField(default=False,verbose_name='已絕育')
 
     photo = models.ImageField(upload_to='pet_photos/', blank=True, null=True)
     birth_day = models.DateField()

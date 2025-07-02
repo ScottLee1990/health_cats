@@ -34,11 +34,11 @@ class PetSerializer(serializers.ModelSerializer):
         queryset=PetSpecies.objects.all(), source='pet_species', write_only=True
     )
 
-    # *** 新增：計算欄位，用於顯示待追蹤日誌數量 ***
+    # 給前端的各項計算參數
     tracking_log_count = serializers.SerializerMethodField()
-
-    # *** 新增：計算欄位，用於顯示下次疫苗日期 ***
     next_injection_date = serializers.SerializerMethodField()
+    last_weight = serializers.SerializerMethodField()
+    sterilised_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Pet
@@ -48,7 +48,10 @@ class PetSerializer(serializers.ModelSerializer):
             'photo', 'created_at', 'updated_at', 'memo', 'favorite_food', 'favorite_food_display',
             'pet_type_id', 'pet_species_id',
             'tracking_log_count',  # 將新欄位加入 fields 中
-            'next_injection_date'  # 將新欄位加入 fields 中
+            'next_injection_date',
+            'last_weight',
+            'sterilised',
+            'sterilised_display',
         ]
 
     # *** 新增這個函式，用來計算 tracking_log_count 的值 ***
@@ -64,6 +67,18 @@ class PetSerializer(serializers.ModelSerializer):
             return latest_injection.next_date.strftime('%Y-%m-%d')
         return None
 
+    def get_last_weight(self, obj):
+        latest = obj.weight_logs.order_by('-recorded_at').first()
+        if latest:
+            return {
+                'weight_kg': float(latest.weight_kg),
+                'recorded_at': latest.recorded_at.strftime('%Y-%m-%d')
+            }
+        return None
+
+    def get_sterilised_display(self, obj):
+        return "已絕育" if obj.sterilised else "未絕育"
+
 
 # 為 HealthLog 模型新增 Serializer
 class HealthLogSerializer(serializers.ModelSerializer):
@@ -75,7 +90,7 @@ class HealthLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = HealthLog
         # photo_records 是唯讀的，因為我們會從請求的 files 中取得
-        fields = ['id', 'topic', 'content', 'photo_records', 'action', 'action_write', 'case_closed', 'created_at']
+        fields = ['id', 'topic', 'content', 'photo_records', 'action', 'action_write', 'case_closed', 'created_at', ]
         read_only_fields = ['photo_records']
 
 # 為 InjectionLog 模型新增 Serializer
